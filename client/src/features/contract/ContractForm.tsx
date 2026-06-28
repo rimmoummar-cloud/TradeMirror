@@ -145,17 +145,11 @@ export function ContractForm({ contract, onSubmit, onBack }: ContractFormProps) 
       <FormField label="Prepayment Condition" registration={register("prepaymentCondition")} />
       <FormField label="Balance Condition" registration={register("balanceCondition")} />
 
-      <div className="section-title">Banking Information</div>
-      <div className="grid-2">
-        <FormField label="Intermediary Bank" registration={register("interBankName")} />
-        <FormField label="Intermediary SWIFT" registration={register("interSwift")} />
-        <FormField label="Intermediary Account Number" registration={register("interAccountNumber")} />
-        <FormField label="Intermediary Bank Address" registration={register("interAddress")} />
-        <FormField label="Beneficiary Bank" registration={register("benBankName")} />
-        <FormField label="Beneficiary Bank SWIFT" registration={register("benSwift")} />
-        <FormField label="Beneficiary Account Number" registration={register("benAccountNumber")} />
-      </div>
-      <FormField label="Beneficiary" registration={register("beneficiary")} />
+      {/* Banking Information is no longer edited here. Beneficiary bank details
+          come exclusively from the selected Bank Profile (see the Bank Profile
+          dropdown above the form) and are injected at PDF generation time.
+          Manual bank inputs were removed so the Bank Profile is the single
+          source of truth. */}
 
       <div className="section-title section-title-row">
         <span>Commercial Information</span>

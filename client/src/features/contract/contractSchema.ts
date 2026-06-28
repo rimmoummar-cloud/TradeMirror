@@ -48,17 +48,10 @@ export interface ContractFormValues {
   prepaymentCondition: string;
   balanceCondition: string;
 
-  // banking — intermediary
-  interBankName: string;
-  interSwift: string;
-  interAccountNumber: string;
-  interAddress: string;
-  // banking — beneficiary bank
-  benBankName: string;
-  benSwift: string;
-  benAccountNumber: string;
-  // banking — beneficiary
-  beneficiary: string;
+  // NOTE: Banking fields are intentionally NOT part of the editable form.
+  // Beneficiary bank details are sourced solely from the selected Bank Profile
+  // and injected at PDF generation time. The contract's existing banking block
+  // is preserved untouched (see applyFormValues) so legacy trades keep working.
 
   // commercial
   brand: string;
@@ -71,8 +64,6 @@ export interface ContractFormValues {
 }
 
 export function toFormValues(c: ContractData): ContractFormValues {
-  const inter = c.banking?.intermediaryBank ?? {};
-  const ben = c.banking?.beneficiaryBank ?? {};
   return {
     contractNumber: c.contractNumber,
     contractDate: c.contractDate,
@@ -109,15 +100,6 @@ export function toFormValues(c: ContractData): ContractFormValues {
 
     prepaymentCondition: c.prepaymentCondition ?? "",
     balanceCondition: c.balanceCondition ?? "",
-
-    interBankName: inter.bankName ?? "",
-    interSwift: inter.swift ?? "",
-    interAccountNumber: inter.accountNumber ?? "",
-    interAddress: inter.address ?? "",
-    benBankName: ben.bankName ?? "",
-    benSwift: ben.swift ?? "",
-    benAccountNumber: ben.accountNumber ?? "",
-    beneficiary: c.banking?.beneficiary ?? "",
 
     brand: c.brand ?? "",
     validity: c.validity ?? "",
@@ -182,21 +164,11 @@ export function applyFormValues(
       .filter(Boolean)
       .join(" | "),
 
-    banking: {
-      ...base.banking,
-      intermediaryBank: {
-        bankName: v.interBankName,
-        swift: v.interSwift,
-        accountNumber: v.interAccountNumber,
-        address: v.interAddress,
-      },
-      beneficiaryBank: {
-        bankName: v.benBankName,
-        swift: v.benSwift,
-        accountNumber: v.benAccountNumber,
-      },
-      beneficiary: v.beneficiary,
-    },
+    // Banking is no longer edited in the form — preserve the contract's existing
+    // banking block exactly as-is. For trades with a Bank Profile, the profile is
+    // injected over this block server-side at PDF generation. For legacy trades
+    // (no profile) this keeps their original bank details intact on every save.
+    banking: base.banking,
 
     brand: v.brand,
     validity: v.validity,
