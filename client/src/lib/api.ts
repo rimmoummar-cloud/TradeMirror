@@ -3,7 +3,12 @@ import { showToast } from './toast';
 import { supabase } from './supabase';
 import { useDebugStore } from '../store/debugStore';
 
-const API_BASE_URL = 'http://localhost:4000/api';
+// Backend base URL is injected at build time via Vite. Set VITE_API_URL to the
+// deployed backend origin (e.g. https://trademirror-1.onrender.com). The "/api"
+// prefix is appended here so the env var holds only the origin. Falls back to the
+// local dev server when unset.
+const API_ORIGIN = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || 'http://localhost:4000';
+const API_BASE_URL = `${API_ORIGIN}/api`;
 
 const REQUEST_TIMEOUT_MS = 60000;
 

@@ -49,7 +49,8 @@ export const env = {
   // Public base URL of the frontend, used to build invitation accept links.
   // MUST be set to the deployed frontend URL in production (e.g.
   // https://app.example.com); otherwise invite links point at localhost.
-  appBaseUrl: optional("APP_BASE_URL", "http://localhost:5173"),
+  // Prefer FRONTEND_BASE_URL; APP_BASE_URL is kept as a backwards-compatible alias.
+  appBaseUrl: optional("FRONTEND_BASE_URL", optional("APP_BASE_URL", "http://localhost:5173")),
   // Comma-separated list of allowed CORS origins (the deployed frontend URL).
   // Leave empty to reflect any origin (the previous default behaviour) — set it
   // in production to lock the API down to your frontend.
