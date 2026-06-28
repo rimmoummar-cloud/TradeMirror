@@ -564,17 +564,13 @@ export interface BankProfile {
   beneficiary_address: string | null;
   intermediary_bank_name: string | null;
   intermediary_bank_swift: string | null;
-  intermediary_bank_address: string | null;
   bank_name: string;
   bank_swift: string | null;
   account_number: string | null;
-  iban: string | null;
   ara_number: string | null;
   field_71a: string | null;
-  currency: string | null;
   is_default: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 export interface BankProfileInput {
@@ -583,14 +579,11 @@ export interface BankProfileInput {
   beneficiary_address?: string | null;
   intermediary_bank_name?: string | null;
   intermediary_bank_swift?: string | null;
-  intermediary_bank_address?: string | null;
   bank_name: string;
   bank_swift?: string | null;
   account_number?: string | null;
-  iban?: string | null;
   ara_number?: string | null;
   field_71a?: string | null;
-  currency?: string | null;
   is_default?: boolean;
 }
 

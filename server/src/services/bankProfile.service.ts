@@ -23,14 +23,11 @@ const FIELDS = [
   "beneficiary_address",
   "intermediary_bank_name",
   "intermediary_bank_swift",
-  "intermediary_bank_address",
   "bank_name",
   "bank_swift",
   "account_number",
-  "iban",
   "ara_number",
   "field_71a",
-  "currency",
 ] as const;
 
 /** Columns that must not be blank. */
@@ -50,7 +47,7 @@ function clean(v?: string | null): string | null {
 async function clearOtherDefaults(supabase: SupabaseClient, exceptId: string): Promise<void> {
   const { error } = await supabase
     .from(TABLE)
-    .update({ is_default: false, updated_at: new Date().toISOString() })
+    .update({ is_default: false })
     .neq("id", exceptId)
     .eq("is_default", true);
   logSupabase("UPDATE bank_profiles clear other defaults", { data: null, error });
@@ -98,7 +95,6 @@ export async function createBankProfile(
   }
   // Apply schema defaults explicitly when omitted (matches the table defaults).
   if (row.field_71a === undefined || row.field_71a === null) row.field_71a = "OUR";
-  if (row.currency === undefined || row.currency === null) row.currency = "USD";
   row.is_default = input.is_default === true;
 
   const { data, error } = await supabase.from(TABLE).insert(row).select().single();
@@ -124,7 +120,7 @@ export async function updateBankProfile(
   logStep(SCOPE, `Starting updateBankProfile(${id})`);
   await getBankProfileById(supabase, id); // clean 404
 
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const patch: Record<string, unknown> = {};
   for (const key of FIELDS) {
     if (input[key] !== undefined) patch[key] = clean(input[key] as string | null);
   }
@@ -145,7 +141,7 @@ export async function updateBankProfile(
   await recordAudit(supabase, {
     userId, action: AUDIT_ACTIONS.BANK_PROFILE_UPDATED, entityType: "bank_profile", entityId: id,
     message: `Bank profile ${updated.profile_name} updated`,
-    metadata: { fields: Object.keys(patch).filter((k) => k !== "updated_at") },
+    metadata: { fields: Object.keys(patch) },
   });
   return updated;
 }

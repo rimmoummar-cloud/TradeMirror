@@ -15,26 +15,16 @@ create table if not exists public.bank_profiles (
   beneficiary_address       text,
   intermediary_bank_name    text,
   intermediary_bank_swift   text,
-  intermediary_bank_address text,
   bank_name                 text not null,
   bank_swift                text,
   account_number            text,
-  iban                      text,
   ara_number                text,
   field_71a                 text default 'OUR',
-  currency                  text default 'USD',
   is_default                boolean default false,
-  created_at                timestamptz not null default now(),
-  updated_at                timestamptz not null default now()
+  created_at                timestamptz not null default now()
 );
 
 create index if not exists bank_profiles_name_idx on public.bank_profiles (lower(profile_name));
-
--- Keep updated_at fresh on every UPDATE (uses the shared trigger fn from schema.sql).
-drop trigger if exists bank_profiles_set_updated_at on public.bank_profiles;
-create trigger bank_profiles_set_updated_at
-  before update on public.bank_profiles
-  for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------------
 -- Row Level Security (defense-in-depth for the public anon path; the trusted

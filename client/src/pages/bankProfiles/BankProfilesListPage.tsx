@@ -86,7 +86,6 @@ export function BankProfilesListPage() {
                   <th className="px-6 py-3 font-medium">Profile Name</th>
                   <th className="px-6 py-3 font-medium">Beneficiary</th>
                   <th className="px-6 py-3 font-medium">Bank</th>
-                  <th className="px-6 py-3 font-medium">Currency</th>
                   <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
@@ -109,7 +108,6 @@ export function BankProfilesListPage() {
                     </td>
                     <td className="px-6 py-4 text-slate-600">{p.beneficiary_name}</td>
                     <td className="px-6 py-4 text-slate-600">{p.bank_name}</td>
-                    <td className="px-6 py-4 text-slate-600">{p.currency || '—'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setDialog({ mode: 'edit', profile: p })} className="text-slate-400 hover:text-blue-600" title="Edit"><Pencil className="w-4 h-4" /></button>
@@ -142,23 +140,20 @@ type FormState = {
   beneficiary_name: string;
   beneficiary_address: string;
   intermediary_bank_name: string;
-  intermediary_bank_address: string;
   intermediary_bank_swift: string;
   bank_name: string;
   bank_swift: string;
   account_number: string;
-  iban: string;
   ara_number: string;
   field_71a: string;
-  currency: string;
   is_default: boolean;
 };
 
 const EMPTY: FormState = {
   profile_name: '', beneficiary_name: '', beneficiary_address: '',
-  intermediary_bank_name: '', intermediary_bank_address: '', intermediary_bank_swift: '',
-  bank_name: '', bank_swift: '', account_number: '', iban: '', ara_number: '',
-  field_71a: 'OUR', currency: 'USD', is_default: false,
+  intermediary_bank_name: '', intermediary_bank_swift: '',
+  bank_name: '', bank_swift: '', account_number: '', ara_number: '',
+  field_71a: 'OUR', is_default: false,
 };
 
 function fromProfile(p: BankProfile): FormState {
@@ -167,15 +162,12 @@ function fromProfile(p: BankProfile): FormState {
     beneficiary_name: p.beneficiary_name ?? '',
     beneficiary_address: p.beneficiary_address ?? '',
     intermediary_bank_name: p.intermediary_bank_name ?? '',
-    intermediary_bank_address: p.intermediary_bank_address ?? '',
     intermediary_bank_swift: p.intermediary_bank_swift ?? '',
     bank_name: p.bank_name ?? '',
     bank_swift: p.bank_swift ?? '',
     account_number: p.account_number ?? '',
-    iban: p.iban ?? '',
     ara_number: p.ara_number ?? '',
     field_71a: p.field_71a ?? '',
-    currency: p.currency ?? '',
     is_default: p.is_default ?? false,
   };
 }
@@ -212,15 +204,12 @@ function BankProfileDialog({ state, onClose, onSaved }: { state: DialogState; on
         beneficiary_name: form.beneficiary_name.trim(),
         beneficiary_address: form.beneficiary_address.trim() || null,
         intermediary_bank_name: form.intermediary_bank_name.trim() || null,
-        intermediary_bank_address: form.intermediary_bank_address.trim() || null,
         intermediary_bank_swift: form.intermediary_bank_swift.trim() || null,
         bank_name: form.bank_name.trim(),
         bank_swift: form.bank_swift.trim() || null,
         account_number: form.account_number.trim() || null,
-        iban: form.iban.trim() || null,
         ara_number: form.ara_number.trim() || null,
         field_71a: form.field_71a.trim() || null,
-        currency: form.currency.trim() || null,
         is_default: form.is_default,
       };
       return isEdit && state.profile
@@ -247,14 +236,11 @@ function BankProfileDialog({ state, onClose, onSaved }: { state: DialogState; on
           <div className="sm:col-span-2"><Field label="Beneficiary Address" value={form.beneficiary_address} onChange={set('beneficiary_address')} /></div>
           <Field label="Intermediary Bank Name" value={form.intermediary_bank_name} onChange={set('intermediary_bank_name')} />
           <Field label="Intermediary Bank SWIFT" value={form.intermediary_bank_swift} onChange={set('intermediary_bank_swift')} />
-          <div className="sm:col-span-2"><Field label="Intermediary Bank Address" value={form.intermediary_bank_address} onChange={set('intermediary_bank_address')} /></div>
           <Field label="Bank Name" value={form.bank_name} onChange={set('bank_name')} required />
           <Field label="Bank SWIFT" value={form.bank_swift} onChange={set('bank_swift')} />
           <Field label="Account Number" value={form.account_number} onChange={set('account_number')} />
-          <Field label="IBAN" value={form.iban} onChange={set('iban')} />
           <Field label="ARA Number" value={form.ara_number} onChange={set('ara_number')} />
           <Field label="Field 71A" value={form.field_71a} onChange={set('field_71a')} />
-          <Field label="Currency" value={form.currency} onChange={set('currency')} />
           <div className="flex items-center gap-2 mt-6">
             <input
               id="is_default"

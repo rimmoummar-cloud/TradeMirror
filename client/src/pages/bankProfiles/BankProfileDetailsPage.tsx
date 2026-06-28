@@ -85,14 +85,11 @@ export function BankProfileDetailsPage() {
           <InfoRow label="Beneficiary Address" value={profile.beneficiary_address} />
           <InfoRow label="Intermediary Bank Name" value={profile.intermediary_bank_name} />
           <InfoRow label="Intermediary Bank SWIFT" value={profile.intermediary_bank_swift} />
-          <InfoRow label="Intermediary Bank Address" value={profile.intermediary_bank_address} />
           <InfoRow label="Bank Name" value={profile.bank_name} />
           <InfoRow label="Bank SWIFT" value={profile.bank_swift} />
           <InfoRow label="Account Number" value={profile.account_number} />
-          <InfoRow label="IBAN" value={profile.iban} />
           <InfoRow label="ARA Number" value={profile.ara_number} />
           <InfoRow label="Field 71A" value={profile.field_71a} />
-          <InfoRow label="Currency" value={profile.currency} />
         </div>
       </Card>
 

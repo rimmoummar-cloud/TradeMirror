@@ -372,8 +372,8 @@ function applyBankProfileToContract(editedData: JsonObject, p: BankProfile): Jso
   if (benBankName !== undefined) beneficiaryBank.bankName = benBankName;
   const benSwift = nonEmpty(p.bank_swift);
   if (benSwift !== undefined) beneficiaryBank.swift = benSwift;
-  // The template has a single "Account Number" line — prefer account_number, fall back to IBAN.
-  const acct = nonEmpty(p.account_number) ?? nonEmpty(p.iban);
+  // The template has a single "Account Number" line.
+  const acct = nonEmpty(p.account_number);
   if (acct !== undefined) beneficiaryBank.accountNumber = acct;
   const benAddress = nonEmpty(p.beneficiary_address);
   if (benAddress !== undefined) beneficiaryBank.address = benAddress;
@@ -383,28 +383,23 @@ function applyBankProfileToContract(editedData: JsonObject, p: BankProfile): Jso
   if (interName !== undefined) intermediaryBank.bankName = interName;
   const interSwift = nonEmpty(p.intermediary_bank_swift);
   if (interSwift !== undefined) intermediaryBank.swift = interSwift;
-  const interAddress = nonEmpty(p.intermediary_bank_address);
-  if (interAddress !== undefined) intermediaryBank.address = interAddress;
 
   banking.beneficiaryBank = beneficiaryBank;
   banking.intermediaryBank = intermediaryBank;
-  // Full snapshot (incl. fields the current template has no anchor for: IBAN,
-  // ARA number, field 71A, currency) so the data is retained on the generation.
+  // Full snapshot (incl. fields the current template has no anchor for:
+  // ARA number, field 71A) so the data is retained on the generation.
   banking.profile = {
     id: p.id,
     profileName: nonEmpty(p.profile_name),
     beneficiaryName: nonEmpty(p.beneficiary_name),
     beneficiaryAddress: nonEmpty(p.beneficiary_address),
     intermediaryBankName: nonEmpty(p.intermediary_bank_name),
-    intermediaryBankAddress: nonEmpty(p.intermediary_bank_address),
     intermediaryBankSwift: nonEmpty(p.intermediary_bank_swift),
     bankName: nonEmpty(p.bank_name),
     bankSwift: nonEmpty(p.bank_swift),
     accountNumber: nonEmpty(p.account_number),
-    iban: nonEmpty(p.iban),
     araNumber: nonEmpty(p.ara_number),
     field71a: nonEmpty(p.field_71a),
-    currency: nonEmpty(p.currency),
   };
 
   ed.banking = banking;
