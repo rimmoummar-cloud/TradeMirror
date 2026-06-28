@@ -21,6 +21,8 @@ import {
 } from "./storage.service";
 import { resolveClientForBuyer } from "./client.service";
 import type { BuyerLike } from "../types/client";
+import { getBankProfileById } from "./bankProfile.service";
+import type { BankProfile } from "../types/bankProfile";
 import { toNum, deriveSaleTotal, sumCosts } from "../utils/financials";
 import { recordAudit } from "./audit.service";
 import { AUDIT_ACTIONS } from "../types/audit";
@@ -245,6 +247,7 @@ export async function updateTrade(
   if (input.trade_reference !== undefined) patch.trade_reference = input.trade_reference;
   if (input.currency !== undefined) patch.currency = input.currency;
   if (input.signing_date !== undefined) patch.signing_date = input.signing_date;
+  if (input.bank_profile_id !== undefined) patch.bank_profile_id = input.bank_profile_id;
 
   // Recompute the financial COLUMNS (single source of truth) whenever the
   // contract JSON or any financial field changes. This covers BOTH write paths:
@@ -338,6 +341,79 @@ export async function updateTrade(
   return updated;
 }
 
+/** Trim a value to a non-empty string, or undefined. Used so an empty bank
+ *  profile field NEVER blanks the template original (the overlay leaves any
+ *  null/undefined value untouched — see pdfGenerator.ts). */
+function nonEmpty(v: unknown): string | undefined {
+  const t = v == null ? "" : String(v).trim();
+  return t === "" ? undefined : t;
+}
+
+/**
+ * Merge a bank profile into the contract's `banking` block (immutably). Only the
+ * fields the overlay engine knows how to draw are mapped onto the beneficiary /
+ * intermediary bank sub-blocks; the full profile is also snapshotted under
+ * `banking.profile` so no data is lost. Empty profile fields stay undefined so
+ * the template's original values are preserved. Every other contract field is
+ * left exactly as it was.
+ */
+function applyBankProfileToContract(editedData: JsonObject, p: BankProfile): JsonObject {
+  const ed: any = { ...(editedData as any) };
+  const banking: any = { ...(ed.banking ?? {}) };
+  const beneficiaryBank: any = { ...(banking.beneficiaryBank ?? {}) };
+  const intermediaryBank: any = { ...(banking.intermediaryBank ?? {}) };
+
+  // Beneficiary (drawn as the "Beneficiary" line).
+  const beneficiary = nonEmpty(p.beneficiary_name);
+  if (beneficiary !== undefined) banking.beneficiary = beneficiary;
+
+  // Beneficiary bank block.
+  const benBankName = nonEmpty(p.bank_name);
+  if (benBankName !== undefined) beneficiaryBank.bankName = benBankName;
+  const benSwift = nonEmpty(p.bank_swift);
+  if (benSwift !== undefined) beneficiaryBank.swift = benSwift;
+  // The template has a single "Account Number" line — prefer account_number, fall back to IBAN.
+  const acct = nonEmpty(p.account_number) ?? nonEmpty(p.iban);
+  if (acct !== undefined) beneficiaryBank.accountNumber = acct;
+  const benAddress = nonEmpty(p.beneficiary_address);
+  if (benAddress !== undefined) beneficiaryBank.address = benAddress;
+  const benCountry = nonEmpty(p.beneficiary_country);
+  if (benCountry !== undefined) beneficiaryBank.country = benCountry;
+
+  // Intermediary bank block.
+  const interName = nonEmpty(p.intermediary_bank_name);
+  if (interName !== undefined) intermediaryBank.bankName = interName;
+  const interSwift = nonEmpty(p.intermediary_bank_swift);
+  if (interSwift !== undefined) intermediaryBank.swift = interSwift;
+  const interAddress = nonEmpty(p.intermediary_bank_address);
+  if (interAddress !== undefined) intermediaryBank.address = interAddress;
+
+  banking.beneficiaryBank = beneficiaryBank;
+  banking.intermediaryBank = intermediaryBank;
+  // Full snapshot (incl. fields the current template has no anchor for: IBAN,
+  // ARA number, field 71A, currency) so the data is retained on the generation.
+  banking.profile = {
+    id: p.id,
+    profileName: nonEmpty(p.profile_name),
+    beneficiaryName: nonEmpty(p.beneficiary_name),
+    beneficiaryAddress: nonEmpty(p.beneficiary_address),
+    beneficiaryCountry: nonEmpty(p.beneficiary_country),
+    intermediaryBankName: nonEmpty(p.intermediary_bank_name),
+    intermediaryBankAddress: nonEmpty(p.intermediary_bank_address),
+    intermediaryBankSwift: nonEmpty(p.intermediary_bank_swift),
+    bankName: nonEmpty(p.bank_name),
+    bankSwift: nonEmpty(p.bank_swift),
+    accountNumber: nonEmpty(p.account_number),
+    iban: nonEmpty(p.iban),
+    araNumber: nonEmpty(p.ara_number),
+    field71a: nonEmpty(p.field_71a),
+    currency: nonEmpty(p.currency),
+  };
+
+  ed.banking = banking;
+  return ed;
+}
+
 /**
  * Generate a new PDF for a trade from its edited_data:
  *   - if the original PDF is available, overlay edits on top of it
@@ -347,7 +423,27 @@ export async function updateTrade(
 export async function generateTradePdf(supabase: SupabaseClient, id: string, userId?: string | null): Promise<Trade> {
   logStep(SCOPE, `Starting generateTradePdf(${id})`);
   const trade = await getTradeById(supabase, id);
-  const editedData = (trade.edited_data ?? trade.extracted_data ?? {}) as JsonObject;
+  let contractData = (trade.edited_data ?? trade.extracted_data ?? {}) as JsonObject;
+
+  // Bank Profile integration: when a trade references a bank profile, inject it
+  // into the contract's banking block so the generated PDF reflects the chosen
+  // profile. A NULL bank_profile_id (existing trades) is a no-op — the banking
+  // data already on edited_data is used exactly as before. A missing/deleted
+  // profile never fails generation; we log and proceed with existing data.
+  if (trade.bank_profile_id) {
+    try {
+      const profile = await getBankProfileById(supabase, trade.bank_profile_id);
+      contractData = applyBankProfileToContract(contractData, profile);
+      logStep(SCOPE, `Applied bank profile "${profile.profile_name}" (${trade.bank_profile_id}) to banking block`);
+    } catch (err) {
+      logError(`${SCOPE}.generateTradePdf bankProfile`, err);
+      logStep(SCOPE, `Bank profile ${trade.bank_profile_id} not applied — generating with existing banking data`);
+    }
+  }
+
+  // Keep `editedData` const so the overlay engine's ContractData narrowing (via
+  // isContractData below) still applies.
+  const editedData = contractData;
 
   let pdfBytes: Uint8Array;
 

@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { LayoutDashboard, FileUp, List, Users, UserCog, History, Settings, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, FileUp, List, Users, UserCog, History, Settings, Landmark, LogOut, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import clsx from 'clsx';
 
@@ -10,6 +10,7 @@ const navItems = [
   { name: 'Upload Trade', path: '/app/upload', icon: FileUp, roles: ['super_admin', 'admin'] },
   { name: 'Trades List', path: '/app/trades', icon: List, roles: ['super_admin', 'admin', 'employee', 'partner'] },
   { name: 'Clients', path: '/app/clients', icon: Users, roles: ['super_admin', 'admin', 'employee'] },
+  { name: 'Bank Profiles', path: '/app/bank-profiles', icon: Landmark, roles: ['super_admin', 'admin'] },
   { name: 'Users', path: '/app/users', icon: UserCog, roles: ['super_admin'] },
   { name: 'Audit Logs', path: '/app/logs', icon: History, roles: ['super_admin'] },
   { name: 'Settings', path: '/app/settings', icon: Settings, roles: ['super_admin'] },

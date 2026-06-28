@@ -11,6 +11,7 @@ import cors from "cors";
 import { env } from "./config/env";
 import tradeRoutes from "./routes/trade.routes";
 import clientRoutes from "./routes/client.routes";
+import bankProfileRoutes from "./routes/bankProfile.routes";
 import auditRoutes from "./routes/audit.routes";
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
@@ -44,6 +45,7 @@ app.get("/health", (_req, res) => {
 // ---- Feature routes --------------------------------------------------------
 app.use("/api/trades", tradeRoutes);
 app.use("/api/clients", clientRoutes);
+app.use("/api/bank-profiles", bankProfileRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);

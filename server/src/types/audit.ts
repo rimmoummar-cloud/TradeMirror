@@ -21,6 +21,10 @@ export const AUDIT_ACTIONS = {
   CLIENT_CREATED: "CLIENT_CREATED",
   CLIENT_UPDATED: "CLIENT_UPDATED",
   CLIENT_DELETED: "CLIENT_DELETED",
+  // Bank profiles
+  BANK_PROFILE_CREATED: "BANK_PROFILE_CREATED",
+  BANK_PROFILE_UPDATED: "BANK_PROFILE_UPDATED",
+  BANK_PROFILE_DELETED: "BANK_PROFILE_DELETED",
   // Documents
   DOCUMENT_UPLOADED: "DOCUMENT_UPLOADED",
   DOCUMENT_DELETED: "DOCUMENT_DELETED",
@@ -42,7 +46,7 @@ export const AUDIT_ACTIONS = {
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
 
-export type AuditEntityType = "trade" | "client" | "document" | "auth" | "user";
+export type AuditEntityType = "trade" | "client" | "document" | "auth" | "user" | "bank_profile";
 
 /** What a caller provides to record one audit event. */
 export interface AuditInput {

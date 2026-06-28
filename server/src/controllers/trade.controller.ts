@@ -96,6 +96,15 @@ export async function updateTrade(req: Request, res: Response) {
     (input as any)[f] = v;
   }
 
+  // Optional link to a bank profile (uuid string) or null to clear it.
+  if (body.bank_profile_id !== undefined) {
+    const v = body.bank_profile_id;
+    if (v !== null && typeof v !== "string") {
+      throw new ApiError(400, "bank_profile_id must be a string (uuid) or null.");
+    }
+    input.bank_profile_id = v as string | null;
+  }
+
   if (Object.keys(input).length === 0) {
     throw new ApiError(
       400,

@@ -11,6 +11,8 @@ import { TradesListPage } from "./pages/trades/TradesListPage";
 import { TradeDetailsPage } from "./pages/trades/TradeDetailsPage";
 import { ClientsListPage } from "./pages/clients/ClientsListPage";
 import { ClientDetailsPage } from "./pages/clients/ClientDetailsPage";
+import { BankProfilesListPage } from "./pages/bankProfiles/BankProfilesListPage";
+import { BankProfileDetailsPage } from "./pages/bankProfiles/BankProfileDetailsPage";
 import { LogsPage } from "./pages/logs/LogsPage";
 import { UploadPage } from "./pages/UploadPage";
 import { EditPage } from "./pages/EditPage";
@@ -40,6 +42,8 @@ export default function App() {
           <Route path="trades/:id" element={<TradeDetailsPage />} />
           <Route path="clients" element={<ClientsListPage />} />
           <Route path="clients/:id" element={<ClientDetailsPage />} />
+          <Route path="bank-profiles" element={<BankProfilesListPage />} />
+          <Route path="bank-profiles/:id" element={<BankProfileDetailsPage />} />
           <Route path="logs" element={<LogsPage />} />
           <Route path="users" element={<UsersPage />} />
           

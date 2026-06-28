@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useContractStore } from "../store/contractStore";
 import { ContractForm } from "../features/contract/ContractForm";
 import { buildContractData } from "../features/contract/contractSchema";
-import { tradesApi } from "../lib/api";
+import { tradesApi, bankProfilesApi } from "../lib/api";
+import { useAuthStore } from "../store/authStore";
 import { showToast } from "../lib/toast";
 
 export function EditPage() {
@@ -14,6 +15,43 @@ export function EditPage() {
   const { draft, updateDraft, reset, createdTradeId } = useContractStore();
   const [isSaving, setIsSaving] = useState(false);
   const [ready, setReady] = useState(false);
+
+  // ---- Bank Profile selection (super_admin / admin only) --------------------
+  const role = useAuthStore((s) => s.profile?.role);
+  const canUseBankProfiles = role === "super_admin" || role === "admin";
+  const [bankProfileId, setBankProfileId] = useState<string | null>(null);
+  const [tradeBankProfileId, setTradeBankProfileId] = useState<string | null>(null);
+  const bankSelInitialized = useRef(false);
+
+  const { data: bankProfiles = [] } = useQuery({
+    queryKey: ["bank-profiles"],
+    queryFn: () => bankProfilesApi.list(),
+    enabled: canUseBankProfiles,
+    staleTime: 0,
+  });
+
+  // Reset the bank-profile selection whenever we switch to a different trade.
+  useEffect(() => {
+    bankSelInitialized.current = false;
+    setBankProfileId(null);
+    setTradeBankProfileId(null);
+  }, [id]);
+
+  // Initialise the selection once: the trade's saved profile if present,
+  // otherwise the profile flagged as default (Admin can still change it).
+  useEffect(() => {
+    if (bankSelInitialized.current) return;
+    if (tradeBankProfileId) {
+      setBankProfileId(tradeBankProfileId);
+      bankSelInitialized.current = true;
+      return;
+    }
+    if (bankProfiles.length) {
+      const def = bankProfiles.find((p) => p.is_default);
+      setBankProfileId(def ? def.id : null);
+      bankSelInitialized.current = true;
+    }
+  }, [tradeBankProfileId, bankProfiles]);
 
   // We load the form data ONCE per trade id. The ref makes the load idempotent
   // so calling updateDraft() (which re-runs this effect) cannot loop or refetch.
@@ -68,6 +106,8 @@ export function EditPage() {
         console.log("[EditPage] LOAD — API response (full trade):", trade);
         console.log("[EditPage] LOAD — edited_data:", trade.edited_data);
         console.log("[EditPage] LOAD — extracted_data:", trade.extracted_data);
+        // Pre-select the trade's saved bank profile (if any).
+        setTradeBankProfileId(trade.bank_profile_id ?? null);
 
         // Always build a COMPLETE ContractData (handles nested OR flat shapes)
         // so the form renders for ANY trade and never bounces / hangs.
@@ -104,6 +144,28 @@ export function EditPage() {
   return (
     <div className="card">
       <h2>Edit contract</h2>
+
+      {canUseBankProfiles && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-slate-700">Bank Profile</label>
+          <select
+            value={bankProfileId ?? ""}
+            onChange={(e) => setBankProfileId(e.target.value || null)}
+            className="mt-1 w-full max-w-md px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">— None —</option>
+            {bankProfiles.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.profile_name}{p.is_default ? " (default)" : ""}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-slate-500">
+            Replaces the beneficiary bank block on the generated PDF. Leave as “None” to keep the contract’s existing bank details.
+          </p>
+        </div>
+      )}
+
       <ContractForm
         // Remount when the contract identity changes so the form starts from
         // fresh defaultValues with zero residual react-hook-form state.
@@ -130,9 +192,13 @@ export function EditPage() {
           setIsSaving(true);
           try {
             // --- mandated update-flow logging ---
+            // Include the chosen bank profile ONLY for roles that can set it, so
+            // a non-admin save never clears an existing bank_profile_id.
+            const payload: { edited_data: any; bank_profile_id?: string | null } = { edited_data: updated };
+            if (canUseBankProfiles) payload.bank_profile_id = bankProfileId;
             console.log("[EditPage] UPDATE — calling updateTrade BEFORE navigation. id:", id);
-            console.log("[EditPage] UPDATE — payload sent:", { edited_data: updated });
-            const saved = await tradesApi.updateTrade(id, { edited_data: updated });
+            console.log("[EditPage] UPDATE — payload sent:", payload);
+            const saved = await tradesApi.updateTrade(id, payload);
             console.log("[EditPage] UPDATE — backend response (full trade):", saved);
             console.log("[EditPage] UPDATE — DB stored edited_data:", saved.edited_data);
             // CRITICAL: drop the React Query cache for this trade (and the list)

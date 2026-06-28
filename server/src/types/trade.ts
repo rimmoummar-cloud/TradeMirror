@@ -27,6 +27,7 @@ export interface Trade {
   created_at: string; // ISO timestamp (Postgres now())
   updated_at: string; // ISO timestamp
   client_id: string | null;
+  bank_profile_id: string | null; // optional link to the bank profile used at generation
 
   // Financial fields (numeric in Postgres; total_costs + net_profit are
   // computed server-side, never trusted from the client).
@@ -60,6 +61,7 @@ export interface TradeFinancialInput {
 export interface UpdateTradeInput extends TradeFinancialInput {
   edited_data?: JsonObject;
   status?: TradeStatus;
+  bank_profile_id?: string | null;
 }
 
 /** One row in `trade_generations` — a single, immutable PDF generation. */

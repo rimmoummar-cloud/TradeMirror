@@ -152,6 +152,7 @@ export interface Trade {
   updated_at?: string;
   trade_reference?: string | null;
   client_id?: string | null;
+  bank_profile_id?: string | null;
   currency?: string | null;
   signing_date?: string | null;
   // Financial columns. total_costs + net_profit are computed server-side.
@@ -224,7 +225,7 @@ export const tradesApi = {
   },
   updateTrade: async (
     id: string,
-    payload: { edited_data?: any; status?: Trade['status'] } & TradeFinancialInput
+    payload: { edited_data?: any; status?: Trade['status']; bank_profile_id?: string | null } & TradeFinancialInput
   ): Promise<Trade> => {
     const { data } = await api.put(`/trades/${id}`, payload);
     return data;
@@ -550,6 +551,82 @@ export const authApi = {
   },
   acceptInvite: async (token: string, password: string): Promise<{ email: string }> => {
     const { data } = await api.post('/auth/accept-invite', { token, password });
+    return data;
+  },
+};
+
+// ---- Bank Profiles ---------------------------------------------------------
+
+export interface BankProfile {
+  id: string;
+  profile_name: string;
+  beneficiary_name: string;
+  beneficiary_address: string | null;
+  intermediary_bank_name: string | null;
+  intermediary_bank_swift: string | null;
+  intermediary_bank_address: string | null;
+  bank_name: string;
+  bank_swift: string | null;
+  account_number: string | null;
+  iban: string | null;
+  ara_number: string | null;
+  field_71a: string | null;
+  beneficiary_country: string | null;
+  currency: string | null;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BankProfileInput {
+  profile_name: string;
+  beneficiary_name: string;
+  beneficiary_address?: string | null;
+  intermediary_bank_name?: string | null;
+  intermediary_bank_swift?: string | null;
+  intermediary_bank_address?: string | null;
+  bank_name: string;
+  bank_swift?: string | null;
+  account_number?: string | null;
+  iban?: string | null;
+  ara_number?: string | null;
+  field_71a?: string | null;
+  beneficiary_country?: string | null;
+  currency?: string | null;
+  is_default?: boolean;
+}
+
+export interface BankProfileTrade {
+  id: string;
+  trade_reference: string | null;
+  status: string;
+  created_at: string;
+  client_name: string | null;
+}
+
+export const bankProfilesApi = {
+  list: async (): Promise<BankProfile[]> => {
+    const { data } = await api.get('/bank-profiles');
+    return data;
+  },
+  get: async (id: string): Promise<BankProfile> => {
+    const { data } = await api.get(`/bank-profiles/${id}`);
+    return data;
+  },
+  create: async (input: BankProfileInput): Promise<BankProfile> => {
+    const { data } = await api.post('/bank-profiles', input);
+    return data;
+  },
+  update: async (id: string, input: Partial<BankProfileInput>): Promise<BankProfile> => {
+    const { data } = await api.put(`/bank-profiles/${id}`, input);
+    return data;
+  },
+  remove: async (id: string): Promise<{ id: string }> => {
+    const { data } = await api.delete(`/bank-profiles/${id}`);
+    return data;
+  },
+  trades: async (id: string): Promise<BankProfileTrade[]> => {
+    const { data } = await api.get(`/bank-profiles/${id}/trades`);
     return data;
   },
 };
