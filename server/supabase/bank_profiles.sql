@@ -22,7 +22,6 @@ create table if not exists public.bank_profiles (
   iban                      text,
   ara_number                text,
   field_71a                 text default 'OUR',
-  beneficiary_country       text,
   currency                  text default 'USD',
   is_default                boolean default false,
   created_at                timestamptz not null default now(),

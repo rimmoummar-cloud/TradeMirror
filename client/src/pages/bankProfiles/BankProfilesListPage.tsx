@@ -141,7 +141,6 @@ type FormState = {
   profile_name: string;
   beneficiary_name: string;
   beneficiary_address: string;
-  beneficiary_country: string;
   intermediary_bank_name: string;
   intermediary_bank_address: string;
   intermediary_bank_swift: string;
@@ -156,7 +155,7 @@ type FormState = {
 };
 
 const EMPTY: FormState = {
-  profile_name: '', beneficiary_name: '', beneficiary_address: '', beneficiary_country: '',
+  profile_name: '', beneficiary_name: '', beneficiary_address: '',
   intermediary_bank_name: '', intermediary_bank_address: '', intermediary_bank_swift: '',
   bank_name: '', bank_swift: '', account_number: '', iban: '', ara_number: '',
   field_71a: 'OUR', currency: 'USD', is_default: false,
@@ -167,7 +166,6 @@ function fromProfile(p: BankProfile): FormState {
     profile_name: p.profile_name ?? '',
     beneficiary_name: p.beneficiary_name ?? '',
     beneficiary_address: p.beneficiary_address ?? '',
-    beneficiary_country: p.beneficiary_country ?? '',
     intermediary_bank_name: p.intermediary_bank_name ?? '',
     intermediary_bank_address: p.intermediary_bank_address ?? '',
     intermediary_bank_swift: p.intermediary_bank_swift ?? '',
@@ -213,7 +211,6 @@ function BankProfileDialog({ state, onClose, onSaved }: { state: DialogState; on
         profile_name: form.profile_name.trim(),
         beneficiary_name: form.beneficiary_name.trim(),
         beneficiary_address: form.beneficiary_address.trim() || null,
-        beneficiary_country: form.beneficiary_country.trim() || null,
         intermediary_bank_name: form.intermediary_bank_name.trim() || null,
         intermediary_bank_address: form.intermediary_bank_address.trim() || null,
         intermediary_bank_swift: form.intermediary_bank_swift.trim() || null,
@@ -247,7 +244,6 @@ function BankProfileDialog({ state, onClose, onSaved }: { state: DialogState; on
         <div className="p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2"><Field label="Profile Name" value={form.profile_name} onChange={set('profile_name')} required /></div>
           <Field label="Beneficiary Name" value={form.beneficiary_name} onChange={set('beneficiary_name')} required />
-          <Field label="Beneficiary Country" value={form.beneficiary_country} onChange={set('beneficiary_country')} />
           <div className="sm:col-span-2"><Field label="Beneficiary Address" value={form.beneficiary_address} onChange={set('beneficiary_address')} /></div>
           <Field label="Intermediary Bank Name" value={form.intermediary_bank_name} onChange={set('intermediary_bank_name')} />
           <Field label="Intermediary Bank SWIFT" value={form.intermediary_bank_swift} onChange={set('intermediary_bank_swift')} />

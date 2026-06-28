@@ -377,8 +377,6 @@ function applyBankProfileToContract(editedData: JsonObject, p: BankProfile): Jso
   if (acct !== undefined) beneficiaryBank.accountNumber = acct;
   const benAddress = nonEmpty(p.beneficiary_address);
   if (benAddress !== undefined) beneficiaryBank.address = benAddress;
-  const benCountry = nonEmpty(p.beneficiary_country);
-  if (benCountry !== undefined) beneficiaryBank.country = benCountry;
 
   // Intermediary bank block.
   const interName = nonEmpty(p.intermediary_bank_name);
@@ -397,7 +395,6 @@ function applyBankProfileToContract(editedData: JsonObject, p: BankProfile): Jso
     profileName: nonEmpty(p.profile_name),
     beneficiaryName: nonEmpty(p.beneficiary_name),
     beneficiaryAddress: nonEmpty(p.beneficiary_address),
-    beneficiaryCountry: nonEmpty(p.beneficiary_country),
     intermediaryBankName: nonEmpty(p.intermediary_bank_name),
     intermediaryBankAddress: nonEmpty(p.intermediary_bank_address),
     intermediaryBankSwift: nonEmpty(p.intermediary_bank_swift),

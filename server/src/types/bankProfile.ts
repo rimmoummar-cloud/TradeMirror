@@ -21,7 +21,6 @@ export interface BankProfile {
   iban: string | null;
   ara_number: string | null;
   field_71a: string | null;
-  beneficiary_country: string | null;
   currency: string | null;
   is_default: boolean;
   created_at: string;
@@ -51,7 +50,6 @@ export interface BankProfileInput {
   iban?: string | null;
   ara_number?: string | null;
   field_71a?: string | null;
-  beneficiary_country?: string | null;
   currency?: string | null;
   is_default?: boolean;
 }

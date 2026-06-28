@@ -30,7 +30,6 @@ const FIELDS = [
   "iban",
   "ara_number",
   "field_71a",
-  "beneficiary_country",
   "currency",
 ] as const;
 

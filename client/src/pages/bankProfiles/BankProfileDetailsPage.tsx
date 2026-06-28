@@ -82,7 +82,6 @@ export function BankProfileDetailsPage() {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <InfoRow label="Beneficiary Name" value={profile.beneficiary_name} />
-          <InfoRow label="Beneficiary Country" value={profile.beneficiary_country} />
           <InfoRow label="Beneficiary Address" value={profile.beneficiary_address} />
           <InfoRow label="Intermediary Bank Name" value={profile.intermediary_bank_name} />
           <InfoRow label="Intermediary Bank SWIFT" value={profile.intermediary_bank_swift} />
